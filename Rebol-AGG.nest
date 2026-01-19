@@ -1,0 +1,216 @@
+;-    .-.                                                                       
+;-   /'v'\   SISKIN-Builder project file                                        
+;-  (/uOu\)  https://github.com/Siskin-framework/Builder/                       
+;-===="="=======================================================================
+
+github: @agg
+;github: ghaerr/agg-2.6 ;/v1.0.0 ;= optional branch name
+;github: coconut2015/agg-2.4
+
+
+version: 0.0.1
+
+compiler: clang
+arch:     x64
+optimize: 2
+
+;define: USE_TRACES
+
+;- options common for all Rebol extensions ----------------------
+#if Windows? [
+	define: _CRT_SECURE_NO_WARNINGS
+	define: _USE_MATH_DEFINES
+	define: TO_WINDOWS
+	upx:    on
+	strip:  on
+]
+#if Linux? [
+	compiler: gcc
+]
+
+target-x86: [
+	arch: x86
+]
+target-x64: [
+	arch: x64
+	defines: [
+		_FILE_OFFSET_BITS=64
+		__LP64__       ; has long (integer) 64 bits
+	]
+	#if macOS?   [ flag: "-arch x86_64" ]
+]
+target-arm64: [
+	arch: arm64
+	#if Linux? [
+		flag: "-arch arm64"
+	]
+	#if macOS? [
+		flag: "-target arm64-apple-darwin"
+	]
+	define: _FILE_OFFSET_BITS=64
+	define: __LP64__   ; has long (integer) 64 bits
+	define: __arm64__
+]
+target-armv7: [
+	arch: armv7
+	flag: "-march=armv7"
+]
+
+;----------------------------------------------------------------
+r3-extension: [
+	flags:  shared
+
+	include: %agg/agg-src/include/
+;	include: %agg/agg-src/agg2d/
+
+	strip:  on
+
+	files: [
+		%src/agg2d.cpp
+		%src/agg-utils.c
+		%src/agg-handles.cpp
+		%src/agg-commands-draw.cpp
+		%src/agg-commands-path.cpp
+		%src/agg-commands-test.cpp
+		%src/agg-commands-table.c
+		%src/agg-rebol-extension.c
+	]
+	#if macOS? [
+		lflags:  [-dynamiclib]
+		flag:    -mmacosx-version-min=10.9
+		compiler: clang
+	]
+	#if Posix? [
+		cflags: [-fPIC -pthread]
+		libraries: [%pthread]
+		define: AGG2D_USE_FREETYPE
+	]
+	#if Windows? [
+		upx: on
+	]
+	#if Linux? [
+		;compiler: g++
+		cflags: -std=c++11
+	]
+
+	files: [
+		%agg/agg-src/src/agg_arc.cpp
+		%agg/agg-src/src/agg_rounded_rect.cpp
+		%agg/agg-src/src/agg_curves.cpp
+		%agg/agg-src/src/agg_bezier_arc.cpp
+		%agg/agg-src/src/agg_trans_affine.cpp
+		%agg/agg-src/src/agg_vcgen_stroke.cpp
+
+		%agg/agg-src/src/agg_image_filters.cpp
+		%agg/agg-src/src/agg_sqrt_tables.cpp
+	]
+	#either Windows? [
+		include: %agg/agg-src/font_win32_tt/
+		file:    %agg/agg-src/font_win32_tt/agg_font_win32_tt.cpp
+	][
+		include: %/usr/include/freetype2/
+		include: %agg/agg-src/font_freetype/
+		file:    %agg/agg-src/font_freetype/agg_font_freetype.cpp
+		library: %freetype
+		library: %stdc++
+	]
+	;- generate main extension header --------------------------------
+	do %src/agg-rebol-extension.r3 
+]
+
+agg-src: [
+	include: %agg/agg-src/include/
+	files: [
+		%agg/agg-src/src/agg_arc.cpp
+		%agg/agg-src/src/agg_rounded_rect.cpp
+		%agg/agg-src/src/agg_curves.cpp
+		%agg/agg-src/src/agg_bezier_arc.cpp
+		%agg/agg-src/src/agg_trans_affine.cpp
+		%agg/agg-src/src/agg_vcgen_stroke.cpp
+		%agg/agg-src/src/agg_image_filters.cpp
+		%agg/agg-src/src/agg_sqrt_tables.cpp
+	]
+]
+
+tutorial-src: [
+	:agg-src
+	github: coconut2015/agg-tutorial
+	include:  %"$SISKIN_INSTALL/include"
+	library: [%"$SISKIN_INSTALL/lib/" %libpng16_static %zs]
+]
+
+eggs: [
+	"cmake AGG" [
+		name: %cmake-agg
+		cmd [
+			"cmake -B $SISKIN_TEMP/agg -S agg/agg-src"
+			"-DCMAKE_VERBOSE_MAKEFILE=ON"
+			"-DCMAKE_BUILD_TYPE=Release"
+			"-Dagg_BUILD_EXAMPLES=ON"
+			"-Dagg_USE_AGG2D:BOOL=ON"
+		]
+		cmd "cmake --build   $SISKIN_TEMP/agg --config release -j 8"
+		cmd "cmake --install $SISKIN_TEMP/agg --prefix $SISKIN_INSTALL"
+	]
+	#if Windows? [
+		"Rebol AGG extension: win32_x86" [
+			name: %agg-windows-x86
+			:target-x86
+			:r3-extension
+		]
+		"Rebol AGG extension: win32_x64" [
+			name: %agg-windows-x64
+			:target-x64
+			:r3-extension
+		]
+	]
+	#if macOS? [
+		"Rebol AGG extension: macos_x64" [
+			name: %agg-macos-x64
+			:target-x64
+			:r3-extension
+		]
+		"Rebol AGG extension: macos_arm64" [
+			name: %agg-macos-arm64
+			:target-arm64
+			:r3-extension
+		]
+	]
+	#if Linux? [
+		"Rebol AGG extension:linux_x64" [
+			name: %agg-linux-x64
+			:target-x64
+			:r3-extension
+		]
+		"Rebol AGG extension: linux_arm64" [
+			name: %agg-linux-arm64
+			:target-arm64
+			:r3-extension
+		]
+		"Rebol AGG extension: linux_armv7" [
+			name: %agg-linux-armv7
+			:target-armv7
+			:r3-extension
+		]
+	]
+	"Tutorial - alphamask" [
+		name: %tutorial_alphamask
+		file: %agg-tutorial/tutorial/tutorial_alphamask.cpp
+		:target-x64
+		:tutorial-src
+
+	]
+	"Tutorial - image 1" [
+		name: %tutorial_image_1
+		file: %agg-tutorial/tutorial/tutorial_image_1.cpp
+		:target-x64
+		:tutorial-src
+	]
+	"Tutorial - image 2" [
+		name: %tutorial_image_2
+		file: %agg-tutorial/tutorial/tutorial_image_2.cpp
+		:target-x64
+		:tutorial-src
+	]
+]
+
