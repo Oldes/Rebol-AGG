@@ -413,3 +413,219 @@ Blits image with optional scaling.
 | `img` | `image!` | Source image |
 | `position` | `pair!` | Destination top-left |
 | `scale` | `pair!/percent!` | Size or scale factor (opt) |
+
+
+# AGG Path Dialect Reference
+
+The AGG Path DSL defines a sub-dialect for constructing complex vector paths within the `shape` command of the draw dialect. Paths are built sequentially from a current "pen" position, supporting absolute and relative coordinates for maximum flexibility.
+
+Paths support filling, stroking, or both based on the outer draw state's `fill`/`pen` settings. Multiple subpaths can be defined before closing.
+
+## Path Movement
+
+### `move`
+
+Moves the path pen to an absolute position (starts new subpath).
+
+**Parameters:**
+
+
+| Type | Description |
+| :-- | :-- |
+| `position` | `pair!` XY coordinates |
+
+**Example:**
+
+```rebol
+shape [move 10x10 ...]
+```
+
+
+### `move-by`
+
+Moves pen by relative offset (starts new subpath).
+
+**Parameters:**
+
+
+| Type | Description |
+| :-- | :-- |
+| `offset` | `pair!` Delta (dx, dy) |
+
+## Line Commands
+
+### `line`
+
+Adds one or more absolute line segments from current position.
+
+**Parameters:**
+
+
+| Type | Description |
+| :-- | :-- |
+| `points` | `pair! +` Absolute endpoint coordinates (batched) |
+
+**Example:**
+
+```rebol
+shape [move 0x0 line 50x0 50x50 0x50]
+```
+
+
+### `line-by`
+
+Adds relative line segments.
+
+**Parameters:**
+
+
+| Type | Description |
+| :-- | :-- |
+| `deltas` | `pair! +` Relative deltas from current position |
+
+### `hline`
+
+Horizontal line to absolute X (Y unchanged).
+
+**Parameters:** `x number!`
+
+### `hline-by`
+
+Horizontal relative delta X.
+
+**Parameters:** `dx number!`
+
+### `vline`
+
+Vertical line to absolute Y (X unchanged).
+
+**Parameters:** `y number!`
+
+### `vline-by`
+
+Vertical relative delta Y.
+
+**Parameters:** `dy number!`
+
+## Arcs
+
+### `arc`
+
+Adds elliptical arc (SVG-style parameters).
+
+**Parameters:**
+
+
+| Param | Type | Description |
+| :-- | :-- | :-- |
+| `end-point` | `pair!` | Arc endpoint coordinates |
+| `rx` | `number!` | X-axis radius |
+| `ry` | `number!` | Y-axis radius |
+| `rotation` | `number!` | Ellipse rotation (degrees) |
+| `sweep` | `logic!` | `true`=positive sweep direction |
+| `large` | `logic!` | `true`=large-arc (>180°) |
+
+### `arc-by`
+
+Relative endpoint version.
+
+**Parameters:**
+
+
+| Param | Type | Description |
+| :-- | :-- | :-- |
+| `end-delta` | `pair!` | Relative endpoint delta |
+
+## Cubic Bézier Curves
+
+### `curve`
+
+Absolute cubic Bézier (C1, C2, end).
+
+**Parameters:**
+
+
+| Param | Type | Description |
+| :-- | :-- | :-- |
+| `control1` | `pair!` | First control point |
+| `control2` | `pair!` | Second control point |
+| `end-point` | `pair!` | Endpoint coordinates |
+
+**Example:**
+
+```rebol
+shape [move 10x10 curve 30x50 70x50 90x10]
+```
+
+
+### `curve-by`
+
+All-relative cubic Bézier.
+
+**Parameters:** Relative `control1`, `control2`, `end-delta pair!`
+
+### `curv`
+
+Smooth cubic (first control relative/reflected).
+
+**Parameters:** `control1 pair!` (relative), `end-point pair!`
+
+### `curv-by`
+
+Fully relative smooth cubic.
+
+**Parameters:** `control1 pair!` (relative), `end-delta pair!`
+
+## Quadratic Bézier Curves
+
+### `qcurve`
+
+Absolute quadratic Bézier (single control).
+
+**Parameters:**
+
+
+| Param | Type | Description |
+| :-- | :-- | :-- |
+| `control` | `pair!` | Control point |
+| `end-point` | `pair!` | Endpoint |
+
+### `qcurve-by`
+
+Relative quadratic.
+
+**Parameters:** Relative `control`, `end-delta pair!`
+
+### `qcurv`
+
+Smooth quadratic (reflected control).
+
+**Parameters:** `control pair!` (relative/reflected)
+
+### `qcurv-by`
+
+Relative smooth quadratic.
+
+**Parameters:** `end-delta pair!`
+
+## Path Closure
+
+### `close`
+
+Closes current subpath to its starting point with a straight line.
+
+**Parameters:** None
+
+**Example (Closed Rectangle with Curve):**
+
+```rebol
+shape [
+    move 10x10
+    line 90x10 90x50 10x50
+    curv 30x30 50x70
+    close
+]
+```
+
+**Usage in Draw:** Paths are consumed by `shape` in the main draw dialect, inheriting fill/pen state. All commands support batching multiple segments for efficiency.
+
