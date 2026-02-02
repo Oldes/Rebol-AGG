@@ -26,7 +26,7 @@ jobs:
       run: ./siskin Rebol-AGG.nest -o ./agg-windows-x64.rebx --msvc agg-windows-x64
 
     - name: Install Rebol
-      uses: oldes/install-rebol@v0.21.0
+      uses: oldes/install-rebol@v3.21.0
 
     - name: Minimal Rebol/AGG extension test
       run:  ./rebol ci-test.r3
@@ -49,7 +49,7 @@ jobs:
       run: ./siskin Rebol-AGG.nest -o ./agg-linux-x64.rebx --gzip agg-linux-x64
 
     - name: Install Rebol
-      uses: oldes/install-rebol@v0.21.0
+      uses: oldes/install-rebol@v3.21.0
 
     - name: Minimal Rebol/AGG extension test
       run:  ./rebol ci-test.r3
@@ -75,7 +75,7 @@ jobs:
       run: ./siskin Rebol-AGG.nest -o ./agg-macos-arm64.rebx --gzip agg-macos-arm64
 
     - name: Install Rebol
-      uses: oldes/install-rebol@v0.21.0
+      uses: oldes/install-rebol@v3.21.0
 
     - name: Minimal Rebol/AGG extension test
       run:  ./rebol ci-test.r3
@@ -112,7 +112,7 @@ jobs:
         otool -L ./agg-macos-x64.rebx
 
     - name: Install Rebol
-      uses: oldes/install-rebol@v0.21.0
+      uses: oldes/install-rebol@v3.21.0
       with:
         arch: x86_64
 
