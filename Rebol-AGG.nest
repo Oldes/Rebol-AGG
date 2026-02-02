@@ -37,7 +37,11 @@ target-x64: [
 		_FILE_OFFSET_BITS=64
 		__LP64__       ; has long (integer) 64 bits
 	]
-	#if macOS?   [ flag: "-arch x86_64" ]
+	#if macOS?   [
+		flag: "-arch x86_64"
+		set 'BREW_LIB     "/usr/local/lib"
+		set 'BREW_INCLUDE "/usr/local/include"
+	]
 ]
 target-arm64: [
 	arch: arm64
@@ -46,6 +50,8 @@ target-arm64: [
 	]
 	#if macOS? [
 		flag: "-target arm64-apple-darwin"
+		set 'BREW_LIB     "/opt/homebrew/lib"
+		set 'BREW_INCLUDE "/opt/homebrew/include"
 	]
 	define: _FILE_OFFSET_BITS=64
 	define: __LP64__   ; has long (integer) 64 bits
@@ -55,7 +61,6 @@ target-armv7: [
 	arch: armv7
 	flag: "-march=armv7"
 ]
-
 ;----------------------------------------------------------------
 r3-extension: [
 	flags:  shared
@@ -108,10 +113,17 @@ r3-extension: [
 		include: %agg/agg-src/font_win32_tt/
 		file:    %agg/agg-src/font_win32_tt/agg_font_win32_tt.cpp
 	][
-		include: %/usr/include/freetype2/
+		#either macOS? [
+			include: %"$BREW_INCLUDE/freetype2/"
+			library: %"$BREW_LIB/"
+		][
+			include: %/usr/local/include/freetype2/
+			library: %/usr/local/lib/
+		]
+		library: %freetype
 		include: %agg/agg-src/font_freetype/
 		file:    %agg/agg-src/font_freetype/agg_font_freetype.cpp
-		library: %freetype
+		
 		library: %stdc++
 	]
 	;- generate main extension header --------------------------------
@@ -142,12 +154,24 @@ tutorial-src: [
 eggs: [
 	"cmake AGG" [
 		name: %cmake-agg
-		cmd [
-			"cmake -B $SISKIN_TEMP/agg -S agg/agg-src"
-			"-DCMAKE_VERBOSE_MAKEFILE=ON"
-			"-DCMAKE_BUILD_TYPE=Release"
-			"-Dagg_BUILD_EXAMPLES=ON"
-			"-Dagg_USE_AGG2D:BOOL=ON"
+		#either Posix? [
+			cmd [
+				"cmake -B $SISKIN_TEMP/agg -S agg/agg-src"
+				"-DCMAKE_VERBOSE_MAKEFILE=ON"
+				"-DCMAKE_BUILD_TYPE=Release"
+				"-Dagg_BUILD_EXAMPLES=OFF"
+				"-Dagg_USE_AGG2D:BOOL=OFF"
+				"-Dagg_USE_AGG2D_FREETYPE:BOOL=ON"
+			]
+		][
+			cmd [
+				"cmake -B $SISKIN_TEMP/agg -S agg/agg-src"
+				"-DCMAKE_VERBOSE_MAKEFILE=ON"
+				"-DCMAKE_BUILD_TYPE=Release"
+				"-Dagg_BUILD_EXAMPLES=ON"
+				"-Dagg_USE_AGG2D:BOOL=ON"
+				"agg_USE_AGG2D_FREETYPE:BOOL=OFF"
+			]
 		]
 		cmd "cmake --build   $SISKIN_TEMP/agg --config release -j 8"
 		cmd "cmake --install $SISKIN_TEMP/agg --prefix $SISKIN_INSTALL"
@@ -165,6 +189,9 @@ eggs: [
 		]
 	]
 	#if macOS? [
+		;@@ Now it depends on Freetype installed thru homebrew.
+		;@@ So only the native host target will work!!!
+
 		"Rebol AGG extension: macos_x64" [
 			name: %agg-macos-x64
 			:target-x64
@@ -193,24 +220,26 @@ eggs: [
 			:r3-extension
 		]
 	]
-	"Tutorial - alphamask" [
-		name: %tutorial_alphamask
-		file: %agg-tutorial/tutorial/tutorial_alphamask.cpp
-		:target-x64
-		:tutorial-src
+	#if Windows? [
+		"Tutorial - alphamask" [
+			name: %tutorial_alphamask
+			file: %agg-tutorial/tutorial/tutorial_alphamask.cpp
+			:target-x64
+			:tutorial-src
 
-	]
-	"Tutorial - image 1" [
-		name: %tutorial_image_1
-		file: %agg-tutorial/tutorial/tutorial_image_1.cpp
-		:target-x64
-		:tutorial-src
-	]
-	"Tutorial - image 2" [
-		name: %tutorial_image_2
-		file: %agg-tutorial/tutorial/tutorial_image_2.cpp
-		:target-x64
-		:tutorial-src
+		]
+		"Tutorial - image 1" [
+			name: %tutorial_image_1
+			file: %agg-tutorial/tutorial/tutorial_image_1.cpp
+			:target-x64
+			:tutorial-src
+		]
+		"Tutorial - image 2" [
+			name: %tutorial_image_2
+			file: %agg-tutorial/tutorial/tutorial_image_2.cpp
+			:target-x64
+			:tutorial-src
+		]
 	]
 ]
 
