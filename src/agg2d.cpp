@@ -412,14 +412,14 @@ void Agg2D::pre_scale(double sx, double sy)
 
 void Agg2D::transform(double ctrX, double ctrY, double rot, double sclX ,double sclY, double trX, double trY)
 {
-    printf("?? %lf %lf %lf %lf %lf %lf %lf\n", ctrX, ctrY, rot, sclX, sclY, trX, trY);
+    //printf("?? %lf %lf %lf %lf %lf %lf %lf\n", ctrX, ctrY, rot, sclX, sclY, trX, trY);
     m_transform *= agg::trans_affine_translation(-ctrX, -ctrY);
     m_transform *= agg::trans_affine_scaling(sclX, sclY);
     m_transform *= agg::trans_affine_rotation(rot);
     m_transform *= agg::trans_affine_translation(trX+ctrX, trY+ctrY);
-    double t[6];
-    m_transform.store_to(t);
-    printf("matrix: %lf %lf %lf %lf %lf %lf\n", t[0],t[1],t[2],t[3],t[4],t[5]);
+    //double t[6];
+    //m_transform.store_to(t);
+    //printf("matrix: %lf %lf %lf %lf %lf %lf\n", t[0],t[1],t[2],t[3],t[4],t[5]);
 }
 
 
@@ -1502,7 +1502,7 @@ void Agg2D::drawPath(DrawPathFlag flag)
         m_rasterizer.add_path(m_pathTransform);
         double parl[6];
         m_transform.store_to(parl);  // Screen transform for image coords
-        printf("p: %f %f %f %f %f %f\n", parl[0], parl[1], parl[2], parl[3], parl[4], parl[5]);
+        //printf("p: %f %f %f %f %f %f\n", parl[0], parl[1], parl[2], parl[3], parl[4], parl[5]);
         //transformImagePath(m_img_fill, parl);
         transformImagePath(m_img_fill, 0,0,m_img_fill.width(), m_img_fill.height(),0,0,m_img_fill.width(), m_img_fill.height());
     }

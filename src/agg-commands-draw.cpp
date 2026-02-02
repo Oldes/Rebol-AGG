@@ -568,7 +568,7 @@ void process_draw(Agg2D *gc, REBSER *cmds, REBCNT index) {
             if (RXT_PAIR == type) {
                 // Rotate around pivot point (cx, cy)
                 // AGG: translate to pivot, rotate, translate back
-                printf("TR: %lf %lf\n", doubles[1], doubles[2]);
+                //printf("TR: %lf %lf\n", doubles[1], doubles[2]);
                 gc->translate(-doubles[1], -doubles[2]); // Move pivot to origin
                 gc->rotate(doubles[0]);                  // Rotate
                 gc->translate(doubles[1], doubles[2]);   // Move back
