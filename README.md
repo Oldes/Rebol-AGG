@@ -1,5 +1,9 @@
 ![rebol-agg](https://github.com/user-attachments/assets/e3364886-9bf7-4974-9f41-a713d73a4a90)
 
+[![Rebol-AGG CI](https://github.com/Oldes/Rebol-AGG/actions/workflows/main.yml/badge.svg)](https://github.com/Oldes/Rebol-AGG/actions/workflows/main.yml)
+[![Gitter](https://badges.gitter.im/rebol3/community.svg)](https://app.gitter.im/#/room/#Rebol3:gitter.im)
+[![Zulip](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rebol.zulipchat.com/)
+
 # Rebol/AGG
 
 AGG (Anti-Grain Geometry) extension for [Rebol3](https://github.com/Oldes/Rebol3) (version 3.14.1 and higher)  
