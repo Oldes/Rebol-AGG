@@ -63,7 +63,7 @@ jobs:
       uses: oldes/install-siskin@v0.21.2
 
     - name: Install freetype
-      uses: brew install freetype
+      run: brew install freetype
 
     - name: Build 64bit Rebol/AGG extension
       run: ./siskin Rebol-AGG.nest -o ./agg-macos-arm64.rebx --gzip agg-macos-arm64
