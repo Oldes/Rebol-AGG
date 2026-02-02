@@ -56,6 +56,7 @@ jobs:
     - name: Install Rebol
       uses: oldes/install-rebol@v3.21.0
       with:
+        arch: arm64
         product: bulk
 
     - name: Minimal Rebol/AGG extension test
